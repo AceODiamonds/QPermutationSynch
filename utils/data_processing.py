@@ -82,8 +82,7 @@ file_path2 = os.path.join(parent_directory, "PF-dataset/car(G)/Cars_007a.mat")
 
 #
 coordinates1,coordinates2 = pair_coordinates(file_path1, file_path2)
-print(coordinates1[0][1])
-print(f'this is 2 {coordinates2[0][0]}')  
+
 
 
 # keypoints1, keypoints2 = pair_keypoints(file_path1, file_path2)
