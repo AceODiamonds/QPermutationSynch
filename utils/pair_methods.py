@@ -141,36 +141,38 @@ def extract_absolute_permutations_2views(result_input):
     return Xi_matrix, Xj_matrix
 
 
-if __name__ == "__main__":
-    data_path1 = r'./PF-dataset/car(G)/Cars_006a.mat'
-    data_path2 = r'./PF-dataset/car(G)/Cars_007a.mat'
-    distance_matrix = pair_distance_calculator(data_path1, data_path2)
-    #print(len(distance_matrix))
-    P = permutation_matrix(distance_matrix)
+# if __name__ == "__main__":
+#     data_path1 = r'./PF-dataset/car(G)/Cars_006a.mat'
+#     data_path2 = r'./PF-dataset/car(G)/Cars_007a.mat'
+#     distance_matrix = pair_distance_calculator(data_path1, data_path2)
+#     #print(len(distance_matrix))
+#     P = permutation_matrix(distance_matrix)
     
-    #the model
-    model = qubo_formulation_2views(P)
-    #solve with qubovert simulated annealing
-    result = anneal_qubo(model)
-    # for res in result:
-    #     print(res.value, res.state)
-    #extract the absolute_matrices
-    xi, xj = extract_absolute_permutations_2views(result)
+#     #the model
+#     model = qubo_formulation_2views(P)
+#     #solve with qubovert simulated annealing
+#     result = anneal_qubo(model)
+#     # for res in result:
+#     #     print(res.value, res.state)
+#     #extract the absolute_matrices
+#     xi, xj = extract_absolute_permutations_2views(result)
 
-    print("Xi absolute permutation is: \n")
-    for row in xi:
-        print(row)
-    print("\nXj absolute permutation is: \n")
-    for row in xj:
-        print(row)
+#     print("Xi absolute permutation is: \n")
+#     for row in xi:
+#         print(row)
+#     print("\nXj absolute permutation is: \n")
+#     for row in xj:
+#         print(row)
 
-    #now perform the multiplication of Xi and Xj^t
-    xi_nump = np.array(xi)
-    xj_nump = np.array(xj)
-    xj_nump_t = xj_nump.transpose()
-    #multiply
-    absolute_mult = np.matmul(xi_nump,xj_nump_t)
-    print("this is Pij: ")
-    print(P)
-    print("This is Xi@Xj^t:")
-    print(absolute_mult)
+#     #now perform the multiplication of Xi and Xj^t
+#     xi_nump = np.array(xi)
+#     xj_nump = np.array(xj)
+#     xj_nump_t = xj_nump.transpose()
+#     #multiply
+#     absolute_mult = np.matmul(xi_nump,xj_nump_t)
+#     print("this is Pij: ")
+#     print(P)
+#     print("This is Xi@Xj^t:")
+#     print(absolute_mult)
+#     print("P - Xi*Xj^t:")
+#     print(P - absolute_mult)
