@@ -19,7 +19,7 @@ def permutation_matrix_generator(*arg):
             perm_mat[f'P{i+1}{j+1}'] = pm.permutation_matrix(temp_dist)
     return perm_mat
 
-#
+
 def qubo_formulation(P: dict, num_views: int):
     model = QUBO()
     # get the number of keypoints from one relative permutation matrix
