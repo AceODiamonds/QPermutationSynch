@@ -3,10 +3,12 @@ import utils.pair_methods as pm
 import numpy as np
 import os
 import re
+from collections import defaultdict
 #QUBOvert
 import qubovert as qv
 from qubovert import boolean_var, QUBO
 from qubovert.sim import anneal_qubo, anneal_pubo
+from dwave.samplers import SimulatedAnnealingSampler
 
 def permutation_matrix_generator(*arg):
     num_views = len(arg)
@@ -62,7 +64,7 @@ def qubo_formulation(P: dict, num_views: int, penalty=1.5):
 #solving
 # result extraction
 
-def extract_best_absolute_matrices(result_list):
+def qv_sim_ann_absolute_permutation_extractor(result_list):
     # Select the best (lowest-energy) result:
     best_result = result_list.best
     state_dict = best_result.state
@@ -91,6 +93,31 @@ def extract_best_absolute_matrices(result_list):
     
     return absolute_matrices
 
+#D-wave sampler absolute matrix extractor
+def dwave_sim_ann_absolute_permutation_extractor(sample: dict):
+    pattern = re.compile(r"x(\d+)(\d+)(\d+)")
+    view_vars = defaultdict(list)
+
+    # Group variables by view number
+    for var, val in sample.items():
+        match = pattern.match(var)
+        if match:
+            view = int(match.group(1))
+            row = int(match.group(2))
+            col = int(match.group(3))
+            view_vars[view].append((row, col, val))
+
+    # Build matrices
+    matrices = {}
+    for view, entries in view_vars.items():
+        n = max(max(r, c) for r, c, v in entries) + 1
+        matrix = np.zeros((n, n), dtype=int)
+        for r, c, v in entries:
+            matrix[r, c] = v
+        matrices[f'X{view}'] = matrix
+
+    return matrices
+
 
 if __name__ == "__main__":
     parent_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -99,22 +126,32 @@ if __name__ == "__main__":
     data_path3 = r'./PF-dataset/car(G)/Cars_008b.mat'
     P = permutation_matrix_generator(data_path1,data_path2,data_path3)
     model = qubo_formulation(P,3, penalty=1.5)
-    result = anneal_qubo(model)
-    best_matrices = extract_best_absolute_matrices(result)
-    #For example, print the matrices for view 1, view 2, view 3:
-    # for view in sorted(best_matrices.keys()):
-    #     print(f"Absolute matrix for view {view}:")
-    #     print(best_matrices[view])
-    #     print()
-    X3_nump_t = np.array(best_matrices[3]).transpose()
-    X1 =  np.eye(10, dtype=int)
-    print("P13 AND X1@X3T::")
-    print(np.array(P['P12']))
-    print(X1)
-    print("this is X3")
-    print(best_matrices[3])
-    print(X3_nump_t)
-    print(np.matmul(X1,X3_nump_t))
-    print(np.array(P['P12']) - (np.matmul(X1,X3_nump_t)))
+    # solve using the D-Wave simulated annealing
+    dwave_qubo = model.Q
+    # solve with D-Wave
+    res = SimulatedAnnealingSampler().sample_qubo(dwave_qubo)
+    best_sample = res.first.sample
+    matrices = dwave_sim_ann_absolute_permutation_extractor(best_sample)
+    for name, mat in matrices.items():
+        print(f"{name}:\n{mat}\n")
+    print(res.first.energy)
+    print(res.info)
+    #validate the accuracy
+    P_12 = P['P12']
+    P_13= P['P13']
+    P_23 = P['P23']
+    X2 = matrices['X2']
+    X3 = matrices['X3']
+    X1 = np.eye(10,dtype = int)
+    X2_nump = np.array(X2)
+    X3_nump = np.array(X3)
+    #result checking
+    print('P12 - X1X2T')
+    print(P_12 - (X1@(X2_nump.transpose())))
+    print('P13 - X1X3T')
+    print(P_13 - (X1@(X3_nump.transpose())))
+    print('P23 - X2X3T')
+    print(P_23 - (X2@(X3_nump.transpose())))
+
     
-    # print(np.array(P['P12']))
+    
