@@ -10,6 +10,12 @@ from qubovert import boolean_var, QUBO
 from qubovert.sim import anneal_qubo, anneal_pubo
 from dwave.samplers import SimulatedAnnealingSampler
 
+#########################
+'''
+This implementation sets X1 to identity , so treats the problem like a convex one.
+'''
+#########################
+
 def permutation_matrix_generator(*arg):
     num_views = len(arg)
     perm_mat = {}
@@ -117,41 +123,86 @@ def dwave_sim_ann_absolute_permutation_extractor(sample: dict):
         matrices[f'X{view}'] = matrix
 
     return matrices
+#evaluation and accuracy checking
+def is_valid_permutation_matrix(X): #check the validity of the absolute permutation matrices(all rows and columns sum to 1)
+    return (
+        np.all(np.sum(X, axis=0) == 1) and
+        np.all(np.sum(X, axis=1) == 1) and
+        np.all((X == 0) | (X == 1))
+    )
+def accuracy_bits(X_est, X_true):
+    total_bits = 0
+    correct_bits = 0
+    for key in X_est:
+        est = X_est[key]
+        true = X_true[key]
+        correct_bits += np.sum(est == true)
+        total_bits += est.size
+    return correct_bits / total_bits
 
 
-if __name__ == "__main__":
-    parent_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    data_path1 = r'./PF-dataset/car(G)/Cars_006a.mat'
-    data_path2 = r'./PF-dataset/car(G)/Cars_007a.mat'
-    data_path3 = r'./PF-dataset/car(G)/Cars_008b.mat'
-    P = permutation_matrix_generator(data_path1,data_path2,data_path3)
-    model = qubo_formulation(P,3, penalty=1.5)
-    # solve using the D-Wave simulated annealing
-    dwave_qubo = model.Q
-    # solve with D-Wave
-    res = SimulatedAnnealingSampler().sample_qubo(dwave_qubo)
-    best_sample = res.first.sample
-    matrices = dwave_sim_ann_absolute_permutation_extractor(best_sample)
-    for name, mat in matrices.items():
-        print(f"{name}:\n{mat}\n")
-    print(res.first.energy)
-    print(res.info)
-    #validate the accuracy
-    P_12 = P['P12']
-    P_13= P['P13']
-    P_23 = P['P23']
-    X2 = matrices['X2']
-    X3 = matrices['X3']
-    X1 = np.eye(10,dtype = int)
-    X2_nump = np.array(X2)
-    X3_nump = np.array(X3)
-    #result checking
-    print('P12 - X1X2T')
-    print(P_12 - (X1@(X2_nump.transpose())))
-    print('P13 - X1X3T')
-    print(P_13 - (X1@(X3_nump.transpose())))
-    print('P23 - X2X3T')
-    print(P_23 - (X2@(X3_nump.transpose())))
 
-    
+### main entry point
+# if __name__ == "__main__":
+#     parent_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#     data_path1 = r'./PF-dataset/car(G)/Cars_006a.mat'
+#     data_path2 = r'./PF-dataset/car(G)/Cars_007a.mat'
+#     data_path3 = r'./PF-dataset/car(G)/Cars_008b.mat'
+#     P = permutation_matrix_generator(data_path1,data_path2,data_path3)
+#     model = qubo_formulation(P,3, penalty=1.5)
+#     # solve using the D-Wave simulated annealing
+#     dwave_qubo = model.Q
+#     # solve with D-Wave
+#     res = SimulatedAnnealingSampler().sample_qubo(dwave_qubo)
+#     best_sample = res.first.sample
+#     matrices = dwave_sim_ann_absolute_permutation_extractor(best_sample)
+#     for name, X in matrices.items():
+#         print(f"{name} is valid:", is_valid_permutation_matrix(X))
+#     print(res.first.energy)
+#     print(matrices)
+#     # print(res.info)
+#     #validate the accuracy
+#     X_true = {
+#     'X1': np.eye(10, dtype=int),
+#     'X2': P['P12'].T,
+#     'X3': P['P13'].T
+#     }
+#     num_trials = 20
+#     accuracies = []
+
+#     for i in range(num_trials):
+#         res = SimulatedAnnealingSampler().sample_qubo(dwave_qubo)
+#         best_sample = res.first.sample
+#         matrices = dwave_sim_ann_absolute_permutation_extractor(best_sample)
+#         acc = accuracy_bits(matrices, X_true)
+#         accuracies.append(acc)
+
+#     mean_acc = np.mean(accuracies)
+#     std_acc = np.std(accuracies)
+
+#     print(f"Accuracy over {num_trials} trials: {mean_acc:.3f} ± {std_acc:.3f}")
+#     P_12 = P['P12']
+#     P_13= P['P13']
+#     P_23 = P['P23']
+#     # X2 = matrices['X2']
+#     # X3 = matrices['X3']
+#     X1 = np.eye(10,dtype = int)
+#     # X2_nump = np.array(X2)
+#     # X3_nump = np.array(X3)
+#     # #result checking
+#     # print('P12 - X1X2T')
+#     # print(P_12 - (X1@(X2_nump.transpose())))
+#     # print('P13 - X1X3T')
+#     # print(P_13 - (X1@(X3_nump.transpose())))
+#     # print('P23 - X2X3T')
+#     # print(P_23 - (X2@(X3_nump.transpose())))
+
+#     # check for cycle consistencyP_12 = matrices['X1'] @ matrices['X2'].T
+#     P_23 = matrices['X2'] @ matrices['X3'].T
+#     P_13_est = X1 @ matrices['X3'].T
+
+#     P_13_via_cycle = P_12 @ P_23
+
+#     print("Cycle consistency error:", np.sum(np.abs(P_13_est - P_13_via_cycle))) # should result in a value close to 0
+
     

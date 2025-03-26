@@ -1,1 +1,2 @@
-./utils/_pycache_
+**/__pycache__/
+*.py[cod]
