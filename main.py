@@ -14,19 +14,21 @@ from dwave.samplers import SimulatedAnnealingSampler
 if __name__ == "__main__":
     # run with 4 images
     parent_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    data_path1 = r'./PF-dataset/car(G)/Cars_008b.mat'
-    data_path2 = r'./PF-dataset/car(G)/Cars_009b.mat'
-    data_path3 = r'./PF-dataset/car(G)/Cars_013b.mat'
-    data_path4 = r'./PF-dataset/car(G)/Cars_017a.mat'
-    data_path5 = r'./PF-dataset/car(G)/Cars_017b.mat'
-    data_path6 = r'./PF-dataset/car(G)/Cars_019a.mat'
+    data_path1 = r'./PF-dataset/duck(S)/060_0000.mat'
+    data_path2 = r'./PF-dataset/duck(S)/060_0005.mat'
+    data_path3 = r'./PF-dataset/duck(S)/060_0010.mat'
+    # data_path4 = r'./PF-dataset/car(G)/.mat'
+    # data_path5 = r'./PF-dataset/car(G)/Cars_017b.mat'
+    # data_path6 = r'./PF-dataset/car(G)/Cars_019a.mat'
     P = imp3.permutation_matrix_generator(data_path1,data_path2,data_path3)
     model = imp3.qubo_formulation(P,3, penalty=1.5)
     dwave_qubo = model.Q
     res = SimulatedAnnealingSampler().sample_qubo(dwave_qubo)
     best_sample = res.first.sample
     matrices = imp3.dwave_sim_ann_absolute_permutation_extractor(best_sample)
-    matrices['X1'] = np.eye(10,dtype = int)
+    if 'X1' not in matrices:
+        n = next(iter(matrices.values())).shape[0]
+        matrices['X1'] = np.eye(n, dtype=int)
     for name, X in matrices.items():
         print(f"{name} is valid:", imp3.is_valid_permutation_matrix(X))
     print(f'Th min energy achieved through simulated annealing is : {res.first.energy}')
@@ -54,4 +56,5 @@ if __name__ == "__main__":
     # cycle consistency error
     cycle_err = imp3.cycle_consistency_error(P, matrices)
     print(f"Cycle consistency error: {cycle_err}")
+    #visualization
     
