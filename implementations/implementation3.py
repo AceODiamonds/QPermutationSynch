@@ -139,6 +139,34 @@ def accuracy_bits(X_est, X_true):
         correct_bits += np.sum(est == true)
         total_bits += est.size
     return correct_bits / total_bits
+#cycle consistency error
+def cycle_consistency_error(P: dict, matrices: dict):
+    """
+    Computes the total cycle consistency error over all triplets of views.
+    P: dict of relative permutation matrices (keys like 'P12', 'P13', ...)
+    matrices: dict of absolute permutation matrices (keys like 'X1', 'X2', ...)
+    """
+    views = sorted(int(k[1:]) for k in matrices.keys())  # Extract view numbers from 'X1', 'X2', ...
+    total_error = 0
+    count = 0
+
+    for i in range(len(views)):
+        for j in range(i + 1, len(views)):
+            for k in range(j + 1, len(views)):
+                vi, vj, vk = views[i], views[j], views[k]
+                key_ij = f'P{vi}{vj}'
+                key_jk = f'P{vj}{vk}'
+                key_ik = f'P{vi}{vk}'
+
+                if key_ij in P and key_jk in P and key_ik in P:
+                    lhs = P[key_ik]
+                    rhs = P[key_ij] @ P[key_jk]
+                    err = np.sum(np.abs(lhs - rhs))
+                    total_error += err
+                    count += 1
+
+    avg_error = total_error / count if count > 0 else 0
+    return avg_error
 
 
 
