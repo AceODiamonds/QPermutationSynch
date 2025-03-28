@@ -12,7 +12,6 @@ from dwave.samplers import SimulatedAnnealingSampler
 
 #
 from datetime import datetime
-import cv2
 import matplotlib.pyplot as plt
 #image processing
 import scipy.io
