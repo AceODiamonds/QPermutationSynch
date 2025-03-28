@@ -15,14 +15,15 @@ import utils.data_processing as dp
 if __name__ == "__main__":
     # run with 4 images
     parent_directory = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    data_path1 = r'./PF-dataset/duck(S)/060_0000.mat'
-    data_path2 = r'./PF-dataset/duck(S)/060_0005.mat'
-    data_path3 = r'./PF-dataset/duck(S)/060_0010.mat'
+    data_path1 = r'./PF-dataset/car(S)/Cars_000a.mat'
+    data_path2 = r'./PF-dataset/car(S)/Cars_001b.mat'
+    data_path3 = r'./PF-dataset/car(S)/Cars_004b.mat'
+    data_path4= r'./PF-dataset/car(S)/Cars_008a.mat'
     # data_path4 = r'./PF-dataset/duck(S)/060_0071.mat'
     # data_path4 = r'./PF-dataset/car(G)/.mat'
     # data_path5 = r'./PF-dataset/car(G)/Cars_017b.mat'
     # data_path6 = r'./PF-dataset/car(G)/Cars_019a.mat'
-    P = imp3.permutation_matrix_generator(data_path1,data_path2,data_path3)
+    P = imp3.permutation_matrix_generator(data_path1,data_path2,data_path3, data_path4)
     model = imp3.qubo_formulation(P,3, penalty=1.5)
     dwave_qubo = model.Q
     res = SimulatedAnnealingSampler().sample_qubo(dwave_qubo)
@@ -42,7 +43,7 @@ if __name__ == "__main__":
     print(f'Th min energy achieved through simulated annealing is : {res.first.energy}')
     print(matrices)
 
-    num_trials = 20
+    num_trials = 30
     accuracies = []
     for i in range(num_trials):
         res = SimulatedAnnealingSampler().sample_qubo(dwave_qubo)
@@ -61,7 +62,7 @@ if __name__ == "__main__":
     cycle_err = imp3.cycle_consistency_error(P, matrices)
     print(f"Cycle consistency error: {cycle_err}")
     #visualization
-    image_paths = [data_path1, data_path2, data_path3]
+    image_paths = [data_path1, data_path2, data_path3,data_path4]
     keypoints_all = dp.get_all_keypoints(*image_paths)
     #saving the images and the parameters
     dp.save_visualization(
