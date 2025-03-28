@@ -1,8 +1,10 @@
 import scipy.io
 import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 import os
 import numpy as np
 from scipy.spatial.distance import cdist
+from datetime import datetime
 
 
 #this script serves the prurpose of loading the image data
@@ -71,11 +73,94 @@ def pair_coordinates(file1,file2):
         coordinates2.append(coordinate_j)
         coordinates1.append(coordinate_i)
     return coordinates1, coordinates2
+#visualization and image post-processing
 
+def get_all_keypoints(*file_paths):
+    all_coords =[]
+    for path in file_paths:
+        coords1, _ = pair_coordinates(path,path)
+        all_coords.append(coords1)
+    return all_coords
+def visualize_matches(image_paths, keypoints_list, permutation_matrices, X_true=None):
+    n_views = len(image_paths)
+    fig, axes = plt.subplots(1, n_views, figsize=(5*n_views, 5))
+    if n_views == 1:
+        axes=[axes]
+    
+    num_points = len(keypoints_list[0])
 
+    #defining distinct colors
+    colors = plt.cm.get_cmap('tab10' , num_points)
+    # prepare mapping: X1 is identity, so X2 = P12.T etc.
+    for idx, (img_path, keypoints) in enumerate(zip(image_paths, keypoints_list)):
+        img = mpimg.imread(img_path.replace(".mat", ".png"))
+        ax = axes[idx]
+        ax.imshow(img)
+        ax.axis('off')
+        if f'X{idx+1}' not in permutation_matrices:
+            print(f"Warning: X{idx+1} not found. Using identity matrix.")
+            n = len(keypoints)
+            X = np.eye(n, dtype=int)
+        else:
+            X = permutation_matrices[f'X{idx+1}']
 
+        for point_idx in range(num_points):
+            mapped_idx = np.argmax(X[point_idx])
+            x, y = keypoints[mapped_idx]
+            ax.scatter(x, y, color=colors(point_idx), s=80, edgecolor='black')
 
+#save the image
+def save_visualization(image_paths , keypoints_list, permutation_matrices, X_true = None , energy=None, rel_perms=None, result_obj=None):
+    '''
+        Saving the annotated final image and a .txt file
+        containing important parameters and result of the annealing
+    '''
+    if 'duck' in image_paths[0].lower():
+        prefix = 'd_'
+    elif 'car' in image_paths[0].lower():
+        prefix = 'c_'
+    elif 'motorbike' in image_paths[0].lower():
+        prefix = 'm_'
+    else:
+        prefix = 'w_'
+    
+    image_codes = [os.path.splitext(os.path.basename(p))[0] for p in image_paths]
+    joined_name = "_".join(image_codes)
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    base_filename = f"{prefix}{joined_name}_{timestamp}"
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.dirname(script_dir)
+    save_folder = os.path.join(parent_dir, 'synchronized_images')
+    os.makedirs(save_folder, exist_ok=True)
+    img_save_path = os.path.join(save_folder, base_filename + ".png")
+    txt_save_path = os.path.join(save_folder, base_filename + ".txt")
 
+    fig = plt.figure(figsize=(5 * len(image_paths), 5))
+    visualize_matches(image_paths, keypoints_list, permutation_matrices, X_true=X_true)
+    plt.savefig(img_save_path, bbox_inches='tight')
+    plt.close(fig)
+    print(f"[✓] Saved visualization to {img_save_path}")
+    with open(txt_save_path, "w") as f:
+        f.write(f"Timestamp: {timestamp}\n")
+        f.write(f"Image paths: {', '.join(image_paths)}\n\n")
 
+        if energy is not None:
+            f.write(f"Simulated Annealing Final Energy: {energy:.6f}\n\n")
 
+        if result_obj is not None and hasattr(result_obj, 'info'):
+            f.write("Result Metadata (Sampler Info):\n")
+            for k, v in result_obj.info.items():
+                f.write(f"  {k}: {v}\n")
+            f.write("\n")
+
+        if rel_perms:
+            f.write("Relative Permutation Matrices (P_ij):\n")
+            for key in sorted(rel_perms.keys()):
+                f.write(f"\n{key}:\n{rel_perms[key]}\n")
+        
+        f.write("\nEstimated Absolute Permutation Matrices (X_i):\n")
+        for key in sorted(permutation_matrices.keys()):
+            f.write(f"\n{key}:\n{permutation_matrices[key]}\n")
+
+    print(f"[✓] Saved report to {txt_save_path}")
 
