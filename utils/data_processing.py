@@ -130,7 +130,7 @@ def save_visualization(image_paths , keypoints_list, permutation_matrices, X_tru
     base_filename = f"{prefix}{joined_name}_{timestamp}"
     script_dir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.dirname(script_dir)
-    save_folder = os.path.join(parent_dir, 'synchronized_images')
+    save_folder = os.path.join(parent_dir, 'synchronized_images_simulatedAnnealing')
     os.makedirs(save_folder, exist_ok=True)
     img_save_path = os.path.join(save_folder, base_filename + ".png")
     txt_save_path = os.path.join(save_folder, base_filename + ".txt")
