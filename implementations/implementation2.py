@@ -9,7 +9,8 @@ import qubovert as qv
 from qubovert import boolean_var, QUBO
 from qubovert.sim import anneal_qubo
 #######################################################################
-
+'''Uses Qubovert's simulated annealing obtaining horrible results'''
+#######################################################################
 def permutation_matrix_generator(*arg):
     num_views = len(arg)
     perm_mat = {}

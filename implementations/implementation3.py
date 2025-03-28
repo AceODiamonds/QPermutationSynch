@@ -14,6 +14,8 @@ from dwave.samplers import SimulatedAnnealingSampler
 from datetime import datetime
 import cv2
 import matplotlib.pyplot as plt
+#image processing
+import scipy.io
 
 #########################
 '''
@@ -173,13 +175,7 @@ def cycle_consistency_error(P: dict, matrices: dict):
     avg_error = total_error / count if count > 0 else 0
     return avg_error
 
-#image processing
-import os
-import cv2
-import numpy as np
-import scipy.io
-import matplotlib.pyplot as plt
-from datetime import datetime
+
 
 
 ### main entry point
