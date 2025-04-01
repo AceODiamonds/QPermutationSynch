@@ -164,40 +164,4 @@ def save_visualization(image_paths , keypoints_list, permutation_matrices, X_tru
 
     print(f"[✓] Saved report to {txt_save_path}")
 
-#generate synthetic data
-def generate_synthetic_permutation_data(
-        num_agents = 5, num_items= 10, noise_level=0.2 , output_dir= "synthetic_data"
-):
-    os.makedirs(output_dir, exist_ok=True)
 
-    #generate random permutation for each agent
-    ground_truth_permutations = []
-    for _ in range(num_agents):
-        perm = np.random.permutation(num_items)
-        ground_truth_permutations.append(perm.tolist())
-    
-    pairwise_permutations = {}
-    for i in range(num_agents):
-        for j in range(num_agents):
-            if i != j:
-                P_i = np.eye(num_items)[ground_truth_permutations[i]]
-                P_j = np.eye(num_items)[ground_truth_permutations[j]]
-                P_j_inv = np.linalg.inv(P_j)
-                P_ij = P_i @ P_j_inv
-
-                # Step 3: Add noise by swapping rows/columns
-                num_swaps = int(noise_level * num_items)
-                for _ in range(num_swaps):
-                    a, b = np.random.choice(num_items, 2, replace=False)
-                    P_ij[[a, b], :] = P_ij[[b, a], :]
-                    P_ij[:, [a, b]] = P_ij[:, [b, a]]
-
-                pairwise_permutations[f"{i}_{j}"] = P_ij.tolist()
-    # Save results
-    with open(os.path.join(output_dir, "ground_truth_permutations.json"), "w") as f:
-        json.dump(ground_truth_permutations, f, indent=2)
-
-    with open(os.path.join(output_dir, "pairwise_permutations.json"), "w") as f:
-        json.dump(pairwise_permutations, f, indent=2)
-
-    print(f"Synthetic data saved in '{output_dir}/'")
