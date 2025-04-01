@@ -5,7 +5,7 @@ import os
 import numpy as np
 from scipy.spatial.distance import cdist
 from datetime import datetime
-
+import json
 
 #this script serves the prurpose of loading the image data
 # that are in particular the willowObject dataset taken from the following link
@@ -163,4 +163,5 @@ def save_visualization(image_paths , keypoints_list, permutation_matrices, X_tru
             f.write(f"\n{key}:\n{permutation_matrices[key]}\n")
 
     print(f"[✓] Saved report to {txt_save_path}")
+
 
