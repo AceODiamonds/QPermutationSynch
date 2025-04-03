@@ -12,3 +12,7 @@ Files description
 | `tests/synthetic_data_test.ipynb`     | Notebook tests for synthetic data; exposes a function naming bug.   |
 | `synthetic_data_runner.py`            | New runner integrating synthetic data with a QAOA implementation.   |
 | `implementations/qaoa_imp.py`         | Minimal QAOA implementation update with updated imports.            |
+
+Willow Images → Keypoints → AlexNet features → Similarity matrices
+→ Hungarian algorithm → Noisy P_ij → QUBO formulation → Annealing
+→ Recovered X_i (permutations) → Evaluation

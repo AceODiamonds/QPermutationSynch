@@ -36,7 +36,7 @@ def permutation_matrix(distance_matrix):
 #so I create two different set of variables
 
 
-def qubo_formulation_2views(P): #only 2 images, so only one single pai-wise permutation matrix
+def qubo_formulation_2views(P): #only 2 images, so only one single pair-wise permutation matrix
     n = P.shape[0] # this will give the number of points on the images
 
     Xi = [[boolean_var(f'xi{i}{j}') for j in range(n)] for i in range(n)]
