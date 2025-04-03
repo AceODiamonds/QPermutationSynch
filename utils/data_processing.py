@@ -11,7 +11,7 @@ import json
 # that are in particular the willowObject dataset taken from the following link
 # https://www.di.ens.fr/willow/research/proposalflow/
 
-def load_image_data(category, image_name):
+def load_image_data(category : str, image_name):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.dirname(script_dir)
     dataset_path = os.path.join(parent_dir, 'PF-dataset')  # Use your actual folder name
