@@ -163,5 +163,3 @@ def save_visualization(image_paths , keypoints_list, permutation_matrices, X_tru
             f.write(f"\n{key}:\n{permutation_matrices[key]}\n")
 
     print(f"[✓] Saved report to {txt_save_path}")
-
-
