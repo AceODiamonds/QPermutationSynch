@@ -1,4 +1,4 @@
-# This repository is created to host the final project I'm developing for my "Quantum Computing" course
+# This repository is created to host the final project that we are developing for our "Quantum Computing" course
 
 
 Files description
