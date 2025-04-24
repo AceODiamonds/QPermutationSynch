@@ -18,7 +18,7 @@ import scipy.io
 
 #########################
 '''
-This implementation sets X1 to identity , so treats the problem like a convex one.
+This implementation sets X1 to identity , 
 '''
 #########################
 
