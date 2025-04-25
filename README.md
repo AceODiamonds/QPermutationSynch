@@ -1,18 +1,41 @@
-# This repository is created to host the final project that we are developing for our "Quantum Computing" course
+# Quantum Permutation Synchronization
+
+This repository is created to host the final project we're developing for our "Quantum Computing" course.
+
+## Project Overview
+
+Permutation synchronization is the problem of recovering consistent feature point matches across multiple views or images by ensuring cycle consistency of pairwise permutations. This project implements and evaluates several approaches:
+
+- Classical Simulated Annealing  
+- Quantum Approximate Optimization Algorithm (QAOA)  
+- Variational Quantum Eigensolver (VQE)
+
+The problem is formulated as a Quadratic Unconstrained Binary Optimization (QUBO) problem which can be solved using either classical optimization techniques or quantum methods.
 
 
-Files description
-| File                                  | Description                                                         |
-|---------------------------------------|---------------------------------------------------------------------|
-| `utils/test.py`                       | Removal of outdated experimental code.                              |
-| `utils/syn_data_processing.py`        | New synthetic data generation functions and related utilities.       |
-| `utils/pair_methods.py`               | Update of import statements to remove deprecated modules.           |
-| `utils/data_processing.py`            | Minor updates including addition of json import and correction of comments. |
-| `tests/test2.py`                      | Updated import paths to reference utils/data_processing.            |
-| `tests/synthetic_data_test.ipynb`     | Notebook tests for synthetic data; exposes a function naming bug.   |
-| `synthetic_data_runner.py`            | New runner integrating synthetic data with a QAOA implementation.   |
-| `implementations/qaoa_imp.py`         | Minimal QAOA implementation update with updated imports.            |
+Willow Images → Keypoints → AlexNet features → Similarity matrix → Hungarian algorithm → Noisy P_ij 
+→ QUBO formulation → Recovered X_i (permutations) → Evaluation
 
-Willow Images → Keypoints → AlexNet features → Similarity matrices
-→ Hungarian algorithm → Noisy P_ij → QUBO formulation → Annealing
-→ Recovered X_i (permutations) → Evaluation
+## File Structure
+
+### ● Main Implementation Files:
+- `annealing.py` – Classical simulated annealing implementation  
+- `qaoa_final.py` – QAOA and VQE implementation using Qiskit  
+- `syn_data_processing.py` – Synthetic data generation and processing utilities  
+- `main.py` – Entry point for running experiments  
+
+### ● Jupyter Notebooks:
+- `annealing.ipynb`, `annealing2.ipynb` – Interactive versions of simulated annealing  
+- `qiskit_ws_qaoa_final.ipynb` – QAOA with Qiskit workspace  
+- `qsychn_final.ipynb`, `qsychn_qaoa_final.ipynb` – Final notebook implementations  
+
+### ● Utility Directories:
+- `utils/` – Helper functions for data processing and methods  
+- `implementations/` – Different implementation approaches  
+- `PF-dataset/` – Willow dataset containing images with feature points  
+
+### ● Results and Data:
+- `results/` – Output results and visualizations  
+- `synthetic_data/` – Generated synthetic datasets  
+- `synth_data_results/` – Results from synthetic data experiments  
+- `synchronized_images_simulatedAnnealing/` – Visualization of synchronization results  
