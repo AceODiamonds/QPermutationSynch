@@ -106,7 +106,7 @@ def qubo_form_maker_fixed_gauge(P, num_views, num_keypoints, penalty=2.5):
     print("created the Q and s for this run")
     return Q, s
 
-def solve_qubo(Q, s, reads=1000):
+def solve_qubo(Q, s, reads=5000):
     bqm = BinaryQuadraticModel(s, Q, 0.0, vartype=BINARY)
     sampler = SimulatedAnnealingSampler()
     res = sampler.sample(bqm, num_reads=reads)
@@ -128,6 +128,66 @@ def permutation_accuracy(true_perm, pred_perm):
     Calculates accuracy as the ratio of correctly matched keypoints.
     """
     return np.sum(true_perm == pred_perm) / true_perm.size
+#
+# ----------------------------
+# Performance metrics and graphs
+# ----------------------------
+def plot_accuracy_vs_noise(df, output_dir="synth_data_results"):
+    plt.figure()
+    df.groupby('noise')['accuracy'].mean().plot(marker='o')
+    plt.title("Accuracy vs. Noise")
+    plt.xlabel("Noise StdDev")
+    plt.ylabel("Accuracy")
+    plt.grid(True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    plt.savefig(os.path.join(output_dir, f"acc_vs_noise_{timestamp}.png"))
+    plt.close()
+
+def plot_accuracy_vs_problem_size(df, output_dir="synth_data_results"):
+    plt.figure()
+    for m in sorted(df['views'].unique()):
+        subset = df[df['views'] == m]
+        grouped = subset.groupby('keypoints')['accuracy'].mean()
+        plt.plot(grouped, marker='o', label=f"m={m}")
+    plt.title("Accuracy vs. Problem Size")
+    plt.xlabel("n (Keypoints)")
+    plt.ylabel("Accuracy")
+    plt.legend()
+    plt.grid(True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    plt.savefig(os.path.join(output_dir, f"acc_vs_problem_size_{timestamp}.png"))
+    plt.close()
+
+def plot_perfect_solution_histogram(df, output_dir="synth_data_results"):
+    df_grouped = df[df['is_perfect']].groupby(['keypoints', 'views']).size().reset_index(name='perfect_count')
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    xs, ys, zs = df_grouped['keypoints'], df_grouped['views'], df_grouped['perfect_count']
+    ax.bar3d(xs, ys, np.zeros_like(zs), 1, 1, zs, shade=True)
+    ax.set_xlabel("n (Keypoints)")
+    ax.set_ylabel("m (Views)")
+    ax.set_zlabel("# Perfect Matches (acc=1.0)")
+    plt.title("Perfect Match Histogram")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    plt.savefig(os.path.join(output_dir, f"perfect_match_hist_{timestamp}.png"))
+    plt.close()
+
+#QUBO size
+def plot_qubo_size(df, output_dir="synth_data_results"):
+    plt.figure()
+    for n in sorted(df['keypoints'].unique()):
+        subset = df[df['keypoints'] == n]
+        grouped = subset.groupby('views')['qubo_vars'].mean()
+        plt.plot(grouped.index, grouped.values, marker='o', label=f"n={n}")
+    plt.title("QUBO Size (Variables) vs Views")
+    plt.xlabel("m (Views)")
+    plt.ylabel("# QUBO Binary Variables")
+    plt.legend()
+    plt.grid(True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    plt.savefig(os.path.join(output_dir, f"qubo_size_vs_views_{timestamp}.png"))
+    plt.close()
 
 # ----------------------------
 # Full Pipeline
@@ -166,16 +226,24 @@ def benchmark_pipeline(runs=5, views_list=[3, 4], keypoints_list=[4, 5], swap_ra
                     pred_perm = decoded[f'X{v}']
                     acc = permutation_accuracy(np.array(true_perm), np.array(pred_perm))
                     results.append({
-                        'run': run,
-                        'views': num_views,
-                        'keypoints': num_keypoints,
-                        'view': v,
-                        'accuracy': acc,
-                        'energy': energy,
-                        'time_sec': time.time() - start_time
+                    'run': run,
+                    'views': num_views,
+                    'keypoints': num_keypoints,
+                    'view': v,
+                    'accuracy': acc,
+                    'energy': energy,
+                    'time_sec': time.time() - start_time,
+                    'noise': noise_std,
+                    'qubo_vars': (num_views - 1) * num_keypoints**2,
+                    'is_perfect': acc == 1.0
                     })
 
     df = pd.DataFrame(results)
+    ## accuracy plots
+    plot_accuracy_vs_noise(df, output_dir)
+    plot_accuracy_vs_problem_size(df, output_dir)
+    plot_perfect_solution_histogram(df, output_dir)
+    ###
 
     # Save graphs with timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -197,4 +265,4 @@ def benchmark_pipeline(runs=5, views_list=[3, 4], keypoints_list=[4, 5], swap_ra
     return df
 
 if __name__ == "__main__":
-    benchmark_pipeline(runs=3, views_list=[3], keypoints_list=[4, 5])
+    benchmark_pipeline(runs=3, views_list=[3,4], keypoints_list=[4, 5])
