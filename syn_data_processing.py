@@ -66,7 +66,7 @@ def generate_synthetic_dataset(num_views=3, num_points=10, swap_ratio=0.2, noise
         json.dump(abs_perm_vectors, f, indent=2)
     with open(os.path.join(output_dir, "relative_permutations.json"), "w") as f:
         json.dump(noisy_rel_perms, f, indent=2)
-    print(f"[✓] Synthetic dataset saved to '{output_dir}/'")
+    print(f"Synthetic dataset saved to '{output_dir}/'")
     return keypoints, abs_perm_dict, noisy_rel_perms
 
 # ----------------------------
@@ -106,7 +106,7 @@ def qubo_form_maker_fixed_gauge(P, num_views, num_keypoints, penalty=2.5):
     print("created the Q and s for this run")
     return Q, s
 
-def solve_qubo(Q, s, reads=5000):
+def solve_qubo(Q, s, reads=1000):
     bqm = BinaryQuadraticModel(s, Q, 0.0, vartype=BINARY)
     sampler = SimulatedAnnealingSampler()
     res = sampler.sample(bqm, num_reads=reads)
@@ -237,6 +237,7 @@ def benchmark_pipeline(runs=5, views_list=[3, 4], keypoints_list=[4, 5], swap_ra
                     'qubo_vars': (num_views - 1) * num_keypoints**2,
                     'is_perfect': acc == 1.0
                     })
+                print(f'The results saved for {num_views} - {num_keypoints} and run {run}')
 
     df = pd.DataFrame(results)
     ## accuracy plots
@@ -265,4 +266,4 @@ def benchmark_pipeline(runs=5, views_list=[3, 4], keypoints_list=[4, 5], swap_ra
     return df
 
 if __name__ == "__main__":
-    benchmark_pipeline(runs=3, views_list=[3,4], keypoints_list=[4, 5])
+    benchmark_pipeline(runs=1, views_list=[3,4], keypoints_list=[4, 5])
