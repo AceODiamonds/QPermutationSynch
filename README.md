@@ -22,7 +22,7 @@ Willow Images → Keypoints → AlexNet features → Similarity matrix → Hunga
 - `annealing.py` – Classical simulated annealing implementation  
 - `qaoa_final.py` – QAOA and VQE implementation using Qiskit  
 - `syn_data_processing.py` – Synthetic data generation and processing utilities  
-- `main.py` – Entry point for running experiments  
+- `main.py` – Entry point for running experiments(not used at the moment since we're testing solely on Jupyter notebooks)  
 
 ### ● Jupyter Notebooks:
 - `annealing.ipynb`, `annealing2.ipynb` – Interactive versions of simulated annealing  
