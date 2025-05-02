@@ -31,7 +31,7 @@ Willow Images → Keypoints → AlexNet features → Similarity matrix → Hunga
 
 ### ● Utility Directories:
 - `utils/` – Helper functions for data processing and methods  
-- `implementations/` – Different implementation approaches  
+- `implementations/` – Different implementation approaches(legacy, simple and minimal implementations)  
 - `PF-dataset/` – Willow dataset containing images with feature points  
 
 ### ● Results and Data:
