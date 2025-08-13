@@ -8,7 +8,6 @@ Permutation synchronization is the problem of recovering consistent feature poin
 
 - Classical Simulated Annealing  
 - Quantum Approximate Optimization Algorithm (QAOA)  
-- Variational Quantum Eigensolver (VQE)
 
 The problem is formulated as a Quadratic Unconstrained Binary Optimization (QUBO) problem which can be solved using either classical optimization techniques or quantum methods.
 
